@@ -17,7 +17,7 @@ class ProductController extends Controller
     public function index()
     {
     
-            $products = Product::with(['variantPrices'])->get();
+            $products = Product::with(['variantPrices'])->paginate(5);
             $product_variants = ProductVariant::all();
 
             // dd($products);
