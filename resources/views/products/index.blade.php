@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
+@php
+use App\Models\ProductVariant;
+@endphp
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Products</h1>
     </div>
@@ -14,8 +16,11 @@
                     <input type="text" name="title" placeholder="Product Title" class="form-control">
                 </div>
                 <div class="col-md-2">
-                    <select name="variant" id="" class="form-control">
-
+                   <select name="variant" id="" class="form-control">
+                        <option value="" disabled selected>--Select variant--</option>
+                        @foreach($product_variants as $item)
+                            <option value="{{$item->id}}">{{$item->variant}} </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -51,34 +56,44 @@
                     </thead>
 
                     <tbody>
-
-                    <tr>
-                        <td>1</td>
-                        <td>T-Shirt <br> Created at : 25-Aug-2020</td>
-                        <td>Quality product in low cost</td>
-                        <td>
-                            <dl class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
-
+        @foreach ($products as $product)
+            <tr>
+                <td>{{ $product->id }}</td>
+                <td>{{ $product->title }}<br>Created at: {{\Carbon\Carbon::parse($product->created_at)->format('d-M-Y') }}</td>
+                <td>{!! Str::limit($product->description, 50) !!}</td>
+                <td>
+                    <dl class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
+                        @foreach ($product->variantPrices->groupBy('product_variant_one', 'product_variant_two', 'product_variant_three') as $prices)
+                            @foreach ($prices as $price)
+                            @php
+                                $variantNames = ProductVariant::whereIn('id', [
+                                    $price->product_variant_one,
+                                    $price->product_variant_two,
+                                    $price->product_variant_three
+                                ])->pluck('variant')->implode(' / ');
+                            @endphp
                                 <dt class="col-sm-3 pb-0">
-                                    SM/ Red/ V-Nick
+                                    {{ $variantNames }}
                                 </dt>
                                 <dd class="col-sm-9">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-4 pb-0">Price : {{ number_format(200,2) }}</dt>
-                                        <dd class="col-sm-8 pb-0">InStock : {{ number_format(50,2) }}</dd>
+                                        <dt class="col-sm-4 pb-0">Price: {{ number_format($price->price, 2) }}</dt>
+                                        <dd class="col-sm-8 pb-0">InStock: {{ number_format($price->stock, 2) }}</dd>
                                     </dl>
                                 </dd>
-                            </dl>
-                            <button onclick="$('#variant').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more</button>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ route('product.edit', 1) }}" class="btn btn-success">Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-
-                    </tbody>
+                            @endforeach
+                        @endforeach
+                    </dl>
+                    <button onclick="$('#variant').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more</button>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-success">Edit</a>
+                    </div>
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
 
                 </table>
             </div>
