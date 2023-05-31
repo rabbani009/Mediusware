@@ -62,8 +62,7 @@ use App\Models\ProductVariant;
                 <tbody>
                 @if ($filteredProducts->isNotEmpty())
 
-            @foreach ($filteredProducts as $product)
-                
+            @foreach ($filteredProducts as $product)      
                         <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $product->title }}<br>Created at: {{\Carbon\Carbon::parse($product->created_at)->format('d-M-Y') }}</td>
