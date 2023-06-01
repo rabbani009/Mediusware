@@ -2,22 +2,6 @@ var currentIndex = 0;
 
 var indexs = [];
 
-// $(document).ready(function () {
-//     addVariantTemplate();
-//     $("#file-upload").dropzone({
-//         url: "{{ route('file-upload') }}",
-//         method: "post",
-//         addRemoveLinks: true,
-//         success: function (file, response) {
-//             //
-//         },
-//         error: function (file, response) {
-//             //
-//         }
-//     });
-// });
-
-//////////////////////
 $(document).ready(function () {
     addVariantTemplate();
     $("#file-upload").dropzone({
@@ -25,24 +9,13 @@ $(document).ready(function () {
         method: "post",
         addRemoveLinks: true,
         success: function (file, response) {
-            // Add the uploaded file path and thumbnail path to the variant preview fields
-            var preview = JSON.parse(file.xhr.responseText);
-            var variantIndex = file.previewElement.dataset.variantIndex;
-            var variantPreviews = $("input[name='product_preview[" + variantIndex + "][]']");
-            variantPreviews.each(function () {
-                $(this).data('image', preview.image);
-                $(this).data('thumbnail', preview.thumbnail);
-            });
+            //
         },
         error: function (file, response) {
-            // Handle the error
+            //
         }
     });
 });
-    
-
-
-/////////////////////
 
 function addVariant(event) {
     event.preventDefault();

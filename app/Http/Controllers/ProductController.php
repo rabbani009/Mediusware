@@ -99,80 +99,132 @@ return view('products.create', compact('variants'));
 public function store(ProductStoreRequest $request)
 {
 
-// dd($request->all());
-$product = new Product();
-$product->title = $request->input('product_name');
-$product->sku = $request->input('product_sku');
-$product->description = $request->input('product_description');
-$product->save();
-
-// Handle variants
-$variants = $request->input('product_variant');
-$variantPreviews = $request->input('product_preview');
-
-if (!empty($variants) && !empty($variantPreviews)) {
-    foreach ($variants as $variantIndex => $variant) {
-        $selectedOption = $variant['option'];
-        foreach ($variant['value'] as $variantValue) {    
-            $newVariant = new ProductVariant();
-            $newVariant->variant = $variantValue;
-            $newVariant->product_id = $product->id;
-            $variantRecord = Variant::where('id', $selectedOption)->first();
-            if ($variantRecord) {
-                
-                $newVariant->variant_id = $variantRecord->id;
-            }
-            $newVariant->save();
-            $newVariantId = $newVariant->id;
-            if (is_array($variantPreviews) && isset($variantPreviews[$variantIndex]) && is_array($variantPreviews[$variantIndex])) {
-                $previews = $variantPreviews[$variantIndex];
-                foreach ($previews as $variantPreview) {
-                    if (is_array($variantPreview)) {
-                        $variantValues = explode('/', $variantPreview['variant']);
-                        // echo '<pre>';
-                        // print_r($variantValues);
-                        // echo '</pre>';
-                        $newVariantPrice = new ProductVariantPrice();
-                        $newVariantPrice->price = $variantPreview['price'];
-                        $newVariantPrice->stock = $variantPreview['stock'];
-                        $newVariantPrice->product_id = $product->id;
-                        $variantOne = ProductVariant::where('variant', $variantValues[0])
-                            ->where('product_id', $product->id)
-                            ->first();
-                        $variantTwo = ProductVariant::where('variant', $variantValues[1])
-                            ->where('product_id', $product->id)
-                            ->first();
-                        $variantThree = ProductVariant::where('variant', $variantValues[2])
-                            ->where('product_id', $product->id)
-                            ->first();
-                        if ($variantOne) {
-                            $newVariantPrice->product_variant_one = $variantOne->id;
-                        }
-                        if ($variantTwo) {
-                            $newVariantPrice->product_variant_two = $variantTwo->id;
-                        }
-                        if ($variantThree) {
-                            $newVariantPrice->product_variant_three = $variantThree->id;
-                        }
-                        $newVariantPrice->save();
-                        $newVariantPriceId = $newVariantPrice->id;
-                        // Store the product image
-                        $productImage = new ProductImage();
-                        $productImage->product_id = $product->id;
-                        $productImage->file_path = $variantPreview['image'];
-                        $productImage->thumbnail = $variantPreview['thumbnail'];
-                        $productImage->save();
-                        
-                    } else {
-                        
-                        echo "not insert";
-                    }
+    $product = new Product();
+    $product->title = $request->input('product_name');
+    $product->sku = $request->input('product_sku');
+    $product->description = $request->input('product_description');
+    $product->save();
+    
+    // Handle variants
+    $variants = $request->input('product_variant');
+    $variantPreviews = $request->input('product_preview');
+    
+    if (!empty($variants) && !empty($variantPreviews)) {
+        // Loop through each variant
+        foreach ($variants as $variantIndex => $variant) {
+            // Get the selected option for the variant
+            $selectedOption = $variant['option'];
+    
+            // Loop through each variant value
+            foreach ($variant['value'] as $variantValue) {
+                // Create a new variant instance
+                $newVariant = new ProductVariant();
+                $newVariant->variant = $variantValue;
+                $newVariant->product_id = $product->id;
+    
+                // Find the variant record based on the selected option and value
+                $variantRecord = Variant::where('id', $selectedOption)->first();
+    
+                // Check if the variant record exists
+                if ($variantRecord) {
+                    // Assign the variant ID from the variant record to the new variant
+                    $newVariant->variant_id = $variantRecord->id;
                 }
+    
+                $newVariant->save();
+            }
+        }
+    
+        // Fetch the variant IDs based on the variant values and product ID
+        foreach ($variantPreviews as $variantPreview) {
+            // Ensure the $variantPreview has the "variant" key
+            if (is_array($variantPreview) && isset($variantPreview['variant'])) {
+                // Extract the variant string from the array
+                $variantString = $variantPreview['variant'];
+    
+                // Explode the variant string into individual values
+                $variantValues = explode('/', $variantString);
+    
+                // // Debugging statement
+                // echo "Variant Preview: " . $variantString . "<br>";
+                // echo "Variant Values: ";
+                // var_dump($variantValues);
+                // echo "<br>";
+    
+                // Initialize the variant IDs
+                $variantOne = null;
+                $variantTwo = null;
+                $variantThree = null;
+    
+                // Fetch the variant IDs based on the variant values and product ID
+                $variantOne = ProductVariant::where('variant', $variantValues[0])
+                    ->where('product_id', $product->id)
+                    ->first();
+    
+                // // Debugging statement
+                // echo "Variant One: ";
+                // var_dump($variantOne);
+                // echo "<br>";
+    
+                if (isset($variantValues[1])) {
+                    $variantTwo = ProductVariant::where('variant', $variantValues[1])
+                        ->where('product_id', $product->id)
+                        ->first();
+    
+                    // // Debugging statement
+                    // echo "Variant Two: ";
+                    // var_dump($variantTwo);
+                    // echo "<br>";
+                }
+    
+                if (isset($variantValues[2])) {
+                    $variantThree = ProductVariant::where('variant', $variantValues[2])
+                        ->where('product_id', $product->id)
+                        ->first();
+    
+                    // // Debugging statement
+                    // echo "Variant Three: ";
+                    // var_dump($variantThree);
+                    // echo "<br>";
+                }
+                    // Create a new variant price instance
+                    $newVariantPrice = new ProductVariantPrice();
+                    $newVariantPrice->product_id = $product->id;
+
+                    // Assign the variant IDs to the new variant price instance
+                    $newVariantPrice->product_variant_one = $variantOne ? $variantOne->variant_id : null;
+                    $newVariantPrice->product_variant_two = $variantTwo ? $variantTwo->variant_id : null;
+                    $newVariantPrice->product_variant_three = $variantThree ? $variantThree->variant_id : null;
+
+                    // Save the new variant price instance
+                    $newVariantPrice->save();
+    
+                // // Debugging statement
+                // echo "New Variant Price: ";
+                // var_dump($newVariantPrice);
+                // echo "<br>";
+    
+                // Save the new variant price instance
+                $newVariantPrice->save();
+    
+                // Debugging statement
+                // echo "New Variant Price Saved<br>";
+    
+                // Stop the script execution for debugging purposes
+                // die();
             }
         }
     }
-}
-return redirect()->route('product.index')->with('success', 'Product created successfully.');
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
 }
 
 
