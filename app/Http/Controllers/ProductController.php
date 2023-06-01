@@ -51,7 +51,7 @@ $filteredProducts = $query->paginate(5);
 
 // For list of the Tables.....
 
-$products = Product::with(['variantPrices'])->paginate(5);
+$products = Product::with(['variantPrices'])->latest()->paginate(5);
 $product_variants = Variant::pluck('title');
 // dd($product_variants);
 $variantOneValues = ProductVariant::distinct('variant')->pluck('variant');
@@ -187,17 +187,15 @@ public function store(ProductStoreRequest $request)
                     // var_dump($variantThree);
                     // echo "<br>";
                 }
-                    // Create a new variant price instance
-                    $newVariantPrice = new ProductVariantPrice();
-                    $newVariantPrice->product_id = $product->id;
-
-                    // Assign the variant IDs to the new variant price instance
-                    $newVariantPrice->product_variant_one = $variantOne ? $variantOne->variant_id : null;
-                    $newVariantPrice->product_variant_two = $variantTwo ? $variantTwo->variant_id : null;
-                    $newVariantPrice->product_variant_three = $variantThree ? $variantThree->variant_id : null;
-
-                    // Save the new variant price instance
-                    $newVariantPrice->save();
+    
+                // Create a new variant price instance
+                $newVariantPrice = new ProductVariantPrice();
+                $newVariantPrice->product_id = $product->id;
+    
+                // Assign the variant IDs to the new variant price instance
+                $newVariantPrice->product_variant_one = $variantOne ? $variantOne->id : null;
+                $newVariantPrice->product_variant_two = $variantTwo ? $variantTwo->id : null;
+                $newVariantPrice->product_variant_three = $variantThree ? $variantThree->id : null;
     
                 // // Debugging statement
                 // echo "New Variant Price: ";
