@@ -141,6 +141,7 @@ public function store(ProductStoreRequest $request)
             if (is_array($variantPreview) && isset($variantPreview['variant'])) {
                 // Extract the variant string from the array
                 $variantString = $variantPreview['variant'];
+                // dd($variantString);
     
                 // Explode the variant string into individual values
                 $variantValues = explode('/', $variantString);
@@ -160,6 +161,7 @@ public function store(ProductStoreRequest $request)
                 $variantOne = ProductVariant::where('variant', $variantValues[0])
                     ->where('product_id', $product->id)
                     ->first();
+                    // dd($variantOne);
     
                 // // Debugging statement
                 // echo "Variant One: ";
@@ -214,14 +216,7 @@ public function store(ProductStoreRequest $request)
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
+      
 
 }
 
